@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#101827">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml"><title>Road 2 → PITX Fare Guide</title>
+<style>
+:root{--bg:#0b1220;--panel:#111b2d;--text:#edf3ff;--muted:#a8b6ca;--red:#ef4444;--red2:#991b1b;--purple:#7c3aed;--purple2:#5b21b6;--line:#334155;--green:#059669}
+*{box-sizing:border-box}body{margin:0;padding:16px;background:radial-gradient(circle at top,#244a87 0,#101827 42%,#080d16 100%);font-family:Arial,sans-serif;color:var(--text)}.app{max-width:560px;margin:auto;background:var(--bg);border:1px solid #263449;border-radius:26px;padding:20px;box-shadow:0 20px 55px #0008}.head{text-align:center;padding:8px 0 20px}.head h1{margin:0 0 7px;font-size:clamp(23px,6vw,30px);letter-spacing:.3px}.sub{color:var(--muted);line-height:1.5}.clock{display:inline-block;margin-top:12px;background:#202d42;border-radius:12px;padding:9px 13px;color:#dbeafe;font-variant-numeric:tabular-nums}.pill{display:inline-block;font-size:11px;padding:5px 9px;border-radius:99px;background:#253247;color:#dbeafe;margin-top:10px}.section{margin-top:16px}.section label,.label{display:block;font-weight:800;margin:0 0 9px;font-size:16px}.search{width:100%;padding:15px 14px;border-radius:15px;border:2px solid #f87171;background:#3b111a;color:#fff;font-size:16px;outline:none;margin-bottom:9px}.search::placeholder{color:#fecaca}.search:focus{border-color:#fb7185;box-shadow:0 0 0 3px #ef444433}.place{width:100%;padding:15px 13px;border:2px solid #a78bfa;background:#29154c;color:#fff;border-radius:15px;font-size:16px;outline:none}.place:focus{border-color:#c4b5fd;box-shadow:0 0 0 3px #8b5cf633}.hint{font-size:12px;color:var(--muted);line-height:1.5;margin:7px 3px 0}.info{background:#1c293b;border-radius:17px;padding:15px;margin-top:17px;line-height:1.7;color:#dbe7f7}.info strong{color:white}.types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 17px}.type{border:2px solid #344256;background:#131d2d;color:#c5d0e0;border-radius:14px;padding:14px 7px;font-weight:800;font-size:14px}.type.active{background:#2563eb;border-color:#60a5fa;color:white;box-shadow:0 5px 16px #2563eb44}.fare{margin-top:16px;border-radius:20px;padding:23px 14px;text-align:center;background:linear-gradient(135deg,#059669,#047857)}.fare small{color:#c7f9e8;font-weight:bold}.amount{font-size:clamp(40px,11vw,55px);font-weight:900;margin:7px 0;overflow-wrap:anywhere}.fare-note{color:#d1fae5;line-height:1.5}.warn{background:#352713;color:#fbd38d;border:1px solid #72521d;border-radius:15px;padding:13px;margin-top:14px;font-size:13px;line-height:1.6}.tools{display:flex;gap:9px;margin-top:12px}.secondary{flex:1;border:1px solid #475569;background:#1b2739;color:#e2e8f0;padding:12px;border-radius:12px;font-weight:bold}.matrix{margin-top:18px;border:1px solid #334155;border-radius:15px;overflow:hidden}.matrix summary{padding:14px;background:#1b2739;font-weight:bold;cursor:pointer}.matrix p{font-size:12px;color:var(--muted);padding:0 13px;line-height:1.6}.matrix table{border-collapse:collapse;width:100%;font-size:12px}.matrix th,.matrix td{border-top:1px solid #334155;padding:8px 5px;text-align:center}.matrix th{background:#222f44}.foot{text-align:center;color:#8191a8;font-size:11px;line-height:1.6;margin:18px 0 4px}.empty{color:#fecaca;font-size:12px;display:none;margin-top:6px}
+@media(max-width:380px){body{padding:8px}.app{padding:14px;border-radius:20px}.head h1{font-size:23px}.section label,.label{font-size:15px}}
+</style></head><body><main class="app">
+<header class="head"><h1>🚌 ROAD 2 → PITX</h1><div class="sub">Bus Fare Guide · Sapang Palay, Bulacan hanggang PITX Terminal</div><div class="clock" id="clock">--:--:--</div><br><span class="pill">Offline-ready · Mobile friendly</span></header>
+<div class="section"><label for="searchFrom">🔎 SAAN SUMAKAY?</label><input class="search" id="searchFrom" placeholder="I-type ang lugar para hanapin…" autocomplete="off"><select class="place" id="fromSelect" aria-label="Saan sumakay"></select><div class="hint">Maghanap sa pulang kahon, pagkatapos piliin ang eksaktong lugar sa lilang listahan.</div><div class="empty" id="emptyFrom">Walang tugmang lugar. Subukan ang mas maikling pangalan.</div></div>
+<div class="section"><label for="searchTo">🔎 SAAN BABABA?</label><input class="search" id="searchTo" placeholder="I-type ang bababaan…" autocomplete="off"><select class="place" id="toSelect" aria-label="Saan bababa"></select><div class="hint">Puwedeng pumili ng anumang lugar sa listahan.</div><div class="empty" id="emptyTo">Walang tugmang lugar. Subukan ang mas maikling pangalan.</div></div>
+<div class="info"><div>📏 <strong>Distansya:</strong> <span id="distance">Pumili ng sakayan at bababaan</span></div><div>🛣️ <strong>Ruta:</strong> <span id="route">Road 2 → PITX Terminal</span></div></div>
+
+<div class="section" id="groupCalc">
+  <div class="label">👥 SABAY-SABAY NA PASAHERO</div>
+  <div class="hint">Magdagdag ng pasahero kahit magkakaiba ang babaan. Awtomatikong kukuwentahin ang bawat isa at ang kabuuang bayad.</div>
+  <div id="passengerRows"></div>
+  <div class="tools"><button class="secondary" id="addPassenger">＋ Magdagdag ng pasahero</button><button class="secondary" id="calcGroup">🧮 Kwentahin lahat</button></div>
+  <div class="fare" style="background:linear-gradient(135deg,#1d4ed8,#6d28d9)"><small>KABUUANG PAMASAHE NG LAHAT</small><div class="amount" id="groupTotal">₱0.00</div><div class="fare-note" id="groupSummary">Punan ang mga detalye ng pasahero.</div></div>
+  <div class="warn" id="groupNotice">Ang mga pares na wala pang beripikadong distansya ay mamarkahang tantiya lamang.</div>
+  <button class="secondary" id="copyGroup" style="width:100%;margin-top:10px">▣ Kopyahin ang listahan at total</button>
+</div>
+
+<div class="section"><div class="label">💳 URI NG PASAHERO</div><div class="types"><button class="type active" data-type="regular">👤 REGULAR</button><button class="type" data-type="discount">🎓 DISCOUNTED</button></div></div>
+<div class="fare"><small id="fareLabel">PAMASAHE — REGULAR</small><div class="amount" id="amount">₱175.00</div><div class="fare-note" id="fareNote">Road 2 hanggang PITX · buong ruta</div></div>
+<div class="warn" id="notice">ℹ️ Ang buong rutang Road 2 → PITX ay nakatakda sa ₱175 regular / ₱150 discounted ayon sa ibinigay mong halaga. Para sa ibang pares ng lugar, kailangan ang aktuwal na distansya para matukoy nang tama ang pamasahe—hindi gagamit ng imbentong kilometro.</div>
+<div class="tools"><button class="secondary" id="reset">↺ I-reset</button><button class="secondary" id="copy">▣ Kopyahin ang resulta</button></div>
+<details class="matrix"><summary>📋 Tingnan ang fare guide (1–60 km)</summary><p>Mga rate sa larawan ng fare matrix na ibinigay mo. Ginagamit ng calculator ang talahanayang ito. Para sa mga stop na wala pang aktuwal na kilometro, ipinapakita ang paunang tantiya; ang buong Road 2 → PITX ay ₱175/₱150 ayon sa halagang ibinigay mo.</p><table><thead><tr><th>KM</th><th>Regular</th><th>Discounted</th></tr></thead><tbody id="matrixBody"></tbody></table></details>
+<div class="foot">Road 2 → PITX · Fare guide · Panatilihing updated ang eksaktong stop-to-stop distance.<br>Hindi ito opisyal na LTFRB certification.</div></main>
+<script>
+const zones=[
+['🟦 Dulo ng Sapang Palay',['Road 2','Quarry','Road 1']],
+['🟦 Towerville / Francisco',['Newtown','Towerville','Tialo','Sto Cristo','Classics','Curba','Northgate']],
+['🟦 Grotto hanggang Palmera',['Guzman','Igay','Marcela 2','Francisco','Palmera']],
+['🟦 Tungko hanggang Gumaok',['Pacific Wave','Gumaok','Paradise / Skyline','Builders','SM Tungko','Savano','Diamond Crest','Pleasant Gate 1','Pleasant Gate 2','Colinas']],
+['🟦 Malaria hanggang Sampaguita',['Sampaguita','Delacosta','Malaria','Sepels','Sapang Alat']],
+['🟨 Amparo hanggang SM Fairview',['Bankers','Pangarap','Mt. Heights','Guadanoville','Amparo Gate 1','Amparo Gate 2','Amparo Gate 3','Dela Coastal','SM Fairview']],
+['🟨 Commonwealth / QC',['Robinsons Novaliches','Fairview Terraces','Quirino Highway–Commonwealth Junction','North Fairview','Regalado Highway Intersection','Mindanao Avenue Extension Junction','Greater Lagro','Bristol Street','Sacred Heart Novaliches','Commonwealth Avenue','Fairview Center Mall (FCM)','Pearl Drive','Doña Carmen Street','Ideal Subdivision','Magsaysay Street','Litex Road','Litex Public Market','Soliven Street','Commonwealth Market','Riverside','Holy Spirit Drive Intersection','COA','Batasan Road Intersection','Sandiganbayan','San Simon Street','Spring Country','Ever Gotesco Commonwealth','Don Antonio Drive','Diliman Doctors Hospital','Luzon Avenue Flyover / Intersection','Zuzuarregui Street','Tandang Sora Avenue Intersection','Capitol Hills Drive Junction','Central Avenue Junction','Iglesia ni Cristo Central Temple','New Era University Area','UP Ayala Land TechnoHub','Commonwealth–Elliptical Road Junction','Philcoa','Masaya Street','Elliptical Road','Housing / NHA','Visayas Avenue Junction','Central Bank / BSP','East Avenue Junction','Lung Center of the Philippines','NKTI','Quezon City Hall','Kalayaan Avenue Junction','Agham Road Junction','Quezon Avenue','Ninoy Aquino Parks and Wildlife Center','BIR Road Junction','Centris / EDSA Quezon Avenue','MRT-3 Quezon Avenue Station','EDSA Intersection','Scout Borromeo Street','Timog Avenue Intersection','Delta','Scout Santiago Street','Fisher Mall','Roosevelt / FPJ Avenue Junction','Scout Reyes Street','Pantranco','Roces Avenue Junction','Paligsahan','Santo Domingo Church','Biak na Bato Street','Banawe Street Intersection','Cordillera Street','D. Tuazon Street Intersection','Welcome Rotonda','QC–Manila Boundary']],
+['🟪 España area',['España Boulevard','Blumentritt','Maceda','Quintos','PNR','Vicente / Dela Fuente','Lacson / Florida','UST Gate 1','UST Gate 2','P. Noval','Morayta','Lerma']],
+['🟪 Lawton / Quiapo',['Quezon Boulevard','R. Papa Street','Raon / Gonzalo Puyat Street','Carriedo Street','Quiapo','Plaza Miranda','Quezon Bridge','Padre Burgos Avenue','Lawton','Manila Central Post Office','Metropolitan Theater','LRT-1 Central Terminal','Arroceros Street','Manila City Hall','SM City Manila Area','Ayala Boulevard Junction','Finance','National Museum Area','Rizal Park / Luneta','UN','Kalaw']],
+['🟪 Pedro Gil / Taft',['Faura','PGH','Pedro Gil','Malvar','Nakpil','Remedies','Quirino','Greenmall','La Salle','Vito Cruz / Ocampo Street']],
+['🟩 Buendia',['Arellano','Avida','Buendia','Leveriza','Harrison','World Trade']],
+['🟩 Pasay hanggang Parañaque',['Pasay Rotonda','Tramo Street Junction','Cabrera Street','Domestic Road Junction','Roxas Boulevard','Redemptorist Road Junction','Baclaran Church','Airport Road Junction']],
+['🟩 PNB / MOA / Macapagal',['Seaside / HK','Petron Macapagal','Tytana','MetLive','Double Dragon','MOA','W.Mall','DFA / Parqal','COD / Ayala Mall','Coastal Road','PITX Terminal']]
+];
+const places=[]; zones.forEach((z,zi)=>z[1].forEach(name=>places.push({name,zone:z[0],zi}))); 
+const from=document.getElementById('fromSelect'),to=document.getElementById('toSelect'); let passenger='regular';
+function fillSelect(sel,query,chosen){const q=query.trim().toLocaleLowerCase();let html='';let last='';let count=0;places.forEach((p,i)=>{if(q&&!p.name.toLocaleLowerCase().includes(q)&&!p.zone.toLocaleLowerCase().includes(q))return;if(p.zone!==last){html+=`<option disabled>${p.zone}</option>`;last=p.zone;}html+=`<option value="${i}">${p.name}</option>`;count++;});sel.innerHTML=html||'<option value="">Walang tugmang lugar</option>';if(chosen!==null&&chosen!==undefined&&[...sel.options].some(o=>o.value===String(chosen)))sel.value=String(chosen);return count;}
+const road2=places.findIndex(p=>p.name==='Road 2'),pitx=places.findIndex(p=>p.name==='PITX Terminal');
+function init(){fillSelect(from,'',road2);fillSelect(to,'',pitx);}
+function fareForKm(km){const idx=Math.max(1,Math.min(60,Math.ceil(km)))-1;return passenger==='regular'?regular[idx]:disc[idx];}
+function update(){let a=Number(from.value),b=Number(to.value);let pa=places[a],pb=places[b];document.getElementById('route').textContent=pa&&pb?`${pa.name} → ${pb.name}`:'Pumili ng dalawang lugar';let full=pa&&pb&&pa.name==='Road 2'&&pb.name==='PITX Terminal';let reverse=pa&&pb&&pa.name==='PITX Terminal'&&pb.name==='Road 2';let amt=null,km=null;
+if(full||reverse){amt=passenger==='regular'?175:150;km=60;}
+else if(pa&&pb&&a!==b){
+ // Route-specific fare provided by the user: SM Fairview ↔ Palmera.
+ const pair=[pa.name,pb.name].sort().join('|');
+ if(pair==='Palmera|SM Fairview') { amt=passenger==='regular'?35:28; km=null; }
+ else { km=Math.max(1,Math.ceil(Math.abs(a-b)*60/(places.length-1))); amt=fareForKm(km); }
+}
+document.getElementById('distance').textContent=km===null?(pa&&pb&&a!==b?'Distansya hindi pa na-verify':'Pumili ng dalawang magkaibang lugar'):(full||reverse?'Buong ruta (fare na itinakda mo)':'~'+km+' km · tantiya');
+document.getElementById('fareLabel').textContent='PAMASAHE — '+(passenger==='regular'?'REGULAR':'DISCOUNTED');
+document.getElementById('amount').textContent=amt===null?'₱0.00':'₱'+amt.toFixed(2);
+const knownPair=pa&&pb&&[pa.name,pb.name].sort().join('|')==='Palmera|SM Fairview';
+document.getElementById('fareNote').textContent=amt===null?'Pumili ng sakayan at bababaan':(full||reverse?(passenger==='regular'?'₱175 buong ruta':'₱150 buong ruta'):knownPair?'₱35 regular / ₱28 discounted — batay sa halimbawang ibinigay mo':'Tantiya mula sa fare matrix para sa '+km+' km');
+document.getElementById('notice').textContent=amt===null?'ℹ️ Pumili ng magkaibang sakayan at bababaan para lumabas ang pamasahe.':'⚠️ '+(full||reverse?'Buong rutang Road 2 → PITX: ₱175 regular / ₱150 discounted, ayon sa halagang ibinigay mo.':knownPair?'SM Fairview ↔ Palmera: ₱35 regular / ₱28 discounted ayon sa halimbawang ibinigay mo. Hindi ito hiwalay na opisyal na fare-matrix entry.':'Ang ibang pares ay paunang tantiya lamang dahil hindi pa nabe-verify ang aktuwal na kilometro sa pagitan ng mga stop.');}
+document.getElementById('searchFrom').addEventListener('input',e=>{let keep=from.value;let n=fillSelect(from,e.target.value,keep);document.getElementById('emptyFrom').style.display=n?'none':'block';});document.getElementById('searchTo').addEventListener('input',e=>{let keep=to.value;let n=fillSelect(to,e.target.value,keep);document.getElementById('emptyTo').style.display=n?'none':'block';});from.addEventListener('change',update);to.addEventListener('change',update);
+document.querySelectorAll('.type').forEach(btn=>btn.addEventListener('click',()=>{passenger=btn.dataset.type;document.querySelectorAll('.type').forEach(b=>b.classList.toggle('active',b===btn));update();}));
+document.getElementById('reset').addEventListener('click',()=>{document.getElementById('searchFrom').value='';document.getElementById('searchTo').value='';fillSelect(from,'',road2);fillSelect(to,'',pitx);passenger='regular';document.querySelectorAll('.type').forEach(b=>b.classList.toggle('active',b.dataset.type==='regular'));update();});
+document.getElementById('copy').addEventListener('click',async()=>{const text=`Road 2 → PITX Fare Guide\nRuta: ${places[Number(from.value)]?.name||''} → ${places[Number(to.value)]?.name||''}\nPasahero: ${passenger==='regular'?'Regular':'Discounted'}\nPamasahe: ${document.getElementById('amount').textContent}`;try{await navigator.clipboard.writeText(text);document.getElementById('copy').textContent='✓ Nakopya';setTimeout(()=>document.getElementById('copy').textContent='▣ Kopyahin ang resulta',1600);}catch(e){alert(text);}});
+function clock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}clock();setInterval(clock,1000);
+// Published fare matrix values transcribed from the supplied photo (km 1–60).
+const regular=[18,18,18,18,18,21,24,27,30,33,36,38.75,41.75,44.75,47.75,50.75,53.75,56.75,59.75,62.75,65.75,68.75,71.75,74.50,77.50,80.50,83.50,86.50,89.50,92.50,95.50,98.50,101.50,104.50,107.50,110.50,113.25,116.25,119.25,122.25,125.25,128.25,131.25,134.25,137.25,140.25,143.25,146.25,149,152,155,158,161,164,167,170,173,176,179,182];
+const disc=[14.50,14.50,14.50,14.50,14.50,16.75,19.25,21.50,24,26.25,28.75,31,33.50,35.75,38.25,40.50,43,45.25,47.75,50,52.50,54.75,57.25,59.50,62,64.50,66.75,69.25,71.50,74,76.25,78.75,81,83.50,85.75,88.25,90.50,93,95.25,97.75,100,102.50,104.75,107.25,109.50,112,114.25,116.75,119,121.50,124,126.25,128.75,131,133.50,135.75,138.25,140.50,143,145.25];
+
+// Multiple-passenger calculator
+const passengerRows=document.getElementById('passengerRows');let groupCounter=0;
+function stopOptions(selected){return places.map((p,i)=>`<option value="${i}" ${i===selected?'selected':''}>${p.name} — ${p.zone.replace(/^.{2} /,'')}</option>`).join('');}
+function addPassengerRow(fromIndex=null,toIndex=pitx,type='regular'){
+ // Bagong pasahero: awtomatikong sundan ang sakayan ng unang pasahero, maliban kung may tahasang ibinigay na fromIndex.
+ if(fromIndex===null){const first=passengerRows.querySelector('.gfrom');fromIndex=first?Number(first.value):road2;}
+ groupCounter++;const id=groupCounter,div=document.createElement('div');div.className='info';div.style.marginTop='12px';div.dataset.manualOrigin='false';
+ div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><strong>Pasahero ${id}</strong><button type="button" class="secondary removePassenger" style="flex:0 0 auto;padding:8px 10px">✕ Alisin</button></div>
+ <label class="label" for="gtype${id}">Uri ng pasahero</label><select class="place gtype" id="gtype${id}"><option value="regular" ${type==='regular'?'selected':''}>Regular</option><option value="student" ${type==='student'?'selected':''}>Student</option><option value="senior" ${type==='senior'?'selected':''}>Senior citizen</option><option value="pwd" ${type==='pwd'?'selected':''}>PWD</option></select>
+ <label class="label" for="gfrom${id}" style="margin-top:10px">Saan sumakay?</label><select class="place gfrom" id="gfrom${id}">${stopOptions(fromIndex)}</select>
+ <label class="label" for="gto${id}" style="margin-top:10px">Saan bababa?</label><select class="place gto" id="gto${id}">${stopOptions(toIndex)}</select>
+ <div style="margin-top:10px;font-weight:800">Pamasahe: <span class="gfare">Kinukuwenta…</span></div><div class="hint gdetail"></div>`;
+ passengerRows.appendChild(div);div.querySelector('.removePassenger').addEventListener('click',()=>{div.remove();renumberRows();calculateGroup();});
+ div.querySelector('.gfrom').addEventListener('change',()=>{
+   const rows=[...passengerRows.children];
+   if(rows[0]===div){
+     // Kapag binago ang unang sakayan, i-update lang ang mga kasamahang hindi pa mano-manong binabago ang sakayan.
+     rows.slice(1).forEach(r=>{if(r.dataset.manualOrigin!=='true'){r.querySelector('.gfrom').value=div.querySelector('.gfrom').value;}});
+   } else { div.dataset.manualOrigin='true'; }
+   calculateGroup();
+ });
+ div.querySelector('.gto').addEventListener('change',calculateGroup);div.querySelector('.gtype').addEventListener('change',calculateGroup);calculateGroup();
+}
+function renumberRows(){[...passengerRows.children].forEach((r,i)=>r.querySelector('strong').textContent=`Pasahero ${i+1}`);}
+function groupFare(a,b,type){const pa=places[a],pb=places[b];if(!pa||!pb||a===b)return {amount:null,detail:'Pumili ng magkaibang sakayan at babaan.',estimated:false};const discounted=type!=='regular';
+ const full=(pa.name==='Road 2'&&pb.name==='PITX Terminal')||(pa.name==='PITX Terminal'&&pb.name==='Road 2');if(full)return {amount:discounted?150:175,detail:'Buong ruta — halagang itinakda mo.',estimated:false};
+ const pair=[pa.name,pb.name].sort().join('|');if(pair==='Palmera|SM Fairview')return {amount:discounted?28:35,detail:'Batay sa halimbawang ibinigay mo; hindi pa beripikadong opisyal na singil.',estimated:false};
+ const km=Math.max(1,Math.min(60,Math.ceil(Math.abs(a-b)*60/(places.length-1))));return {amount:discounted?disc[km-1]:regular[km-1],detail:`~${km} km na tantiya lamang; hindi aktuwal na distansya.`,estimated:true};}
+function calculateGroup(){let total=0,count=0,est=0,invalid=0,lines=[];[...passengerRows.children].forEach((r,i)=>{const a=Number(r.querySelector('.gfrom').value),b=Number(r.querySelector('.gto').value),type=r.querySelector('.gtype').value,f=groupFare(a,b,type);r.querySelector('.gfare').textContent=f.amount===null?'Hindi pa makuwenta':`₱${f.amount.toFixed(2)}`;r.querySelector('.gdetail').textContent=f.detail;if(f.amount!==null){total+=f.amount;count++;if(f.estimated)est++;lines.push(`Pasahero ${i+1}: ${places[a].name} → ${places[b].name} (${type==='regular'?'Regular':type==='student'?'Student':type==='senior'?'Senior citizen':'PWD'}) = ₱${f.amount.toFixed(2)}${f.estimated?' [TANTIYA]':''}`);}else invalid++;});document.getElementById('groupTotal').textContent=`₱${total.toFixed(2)}`;document.getElementById('groupSummary').textContent=`${count} pasahero ang may pamasahe${invalid?`; ${invalid} hindi pa kumpleto`:''}.`;document.getElementById('groupNotice').textContent=est?`⚠️ May ${est} pamasahe na tantiya lamang dahil hindi pa beripikado ang aktuwal na distansya. I-verify muna bago gawing eksaktong singil.`:'ℹ️ Tiyaking tugma ang pamasahe sa aktuwal na ruta at naaangkop na discount.';window.groupCopyText=lines.concat([`KABUUAN: ₱${total.toFixed(2)}`]).join('\n');}
+document.getElementById('addPassenger').addEventListener('click',()=>addPassengerRow(null,pitx,'regular'));document.getElementById('calcGroup').addEventListener('click',calculateGroup);document.getElementById('copyGroup').addEventListener('click',async()=>{const t=window.groupCopyText||'Wala pang pamasahe.';try{await navigator.clipboard.writeText(t);document.getElementById('copyGroup').textContent='✓ Nakopya';}catch(e){alert(t);}});
+
+addPassengerRow(road2,places.findIndex(p=>p.name==='Palmera'),'student');
+document.getElementById('matrixBody').innerHTML=regular.map((v,i)=>`<tr><td>${i+1}</td><td>₱${v.toFixed(2)}</td><td>₱${disc[i].toFixed(2)}</td></tr>`).join('');init();update();
+</script><script>if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => {})); }</script>
+</body></html>
